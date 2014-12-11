@@ -144,7 +144,7 @@ def find_path_graphlab(url, id1, id2):
     model = gl.nearest_neighbors.create(images_resized, features=['extracted_features'], label = 'id', distance='euclidean')
 
     incr_status() 
-    k=10
+    k=8
     path = None
     while not path:
       print "try " + str(k)
@@ -164,8 +164,33 @@ def find_path_graphlab(url, id1, id2):
     end_time = time.time()
     uptime = end_time - start_time
     print "Time: "+str(uptime)
-    print path
-    return jsonify(path)
+    print type(path)
+    #print path
+    array = []
+    for item in path:
+      print item
+      data = {}
+      data['id'] = item[0]
+      data['url'] = images_resized['path'][item[0]]
+      print data
+      array.append(data)
+#    path2 = translate_path(path, images_resized)
+    return json.dumps({"result":array})
+
+class MyImage(object):
+  """__init__() functions as the class constructor"""
+  def __init__(self, id=None, url=None):
+    self.id = id
+    self.url = url
+
+def translate_path(my_path, images_resized):
+    mylist = []
+    for x in my_path:
+      print(x)
+      x = x[0]
+      print(x)
+      mylist.append(MyImage(id=str(x), url=images_resized['path'][x]))
+    return mylist   
 
 ###
 if __name__ == '__main__':
