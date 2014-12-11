@@ -21,7 +21,9 @@ import pickle
 import pickledb 
 
 
-app = Flask(__name__)
+#app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
+
 db = pickledb.load('example.db', False) 
 
 
@@ -55,6 +57,19 @@ def search_images():
     except:
         result = "Fail"
     return result
+
+@app.route('/getallimages', methods=['GET'])
+def get_all_images():
+    array = []
+    images_resized = gl.load_sframe('tmp5.csv')
+    for item in images_resized:
+      data = {}
+      data['id'] = item['id']
+      data['url'] = item['path']
+      array.append(data)
+#    path2 = translate_path(path, images_resized)
+    return json.dumps({"result":array})
+
 
 ###
 def search_images_impl(city):
@@ -177,11 +192,6 @@ def find_path_graphlab(url, id1, id2):
 #    path2 = translate_path(path, images_resized)
     return json.dumps({"result":array})
 
-class MyImage(object):
-  """__init__() functions as the class constructor"""
-  def __init__(self, id=None, url=None):
-    self.id = id
-    self.url = url
 
 def translate_path(my_path, images_resized):
     mylist = []
