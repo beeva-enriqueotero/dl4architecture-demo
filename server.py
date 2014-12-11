@@ -25,14 +25,6 @@ app = Flask(__name__)
 db = pickledb.load('example.db', False) 
 
 
-@app.route('/loadimages', methods=['GET'])
-def load_images():
-    result = "Yeah"
-    #url = "http://raw.githubusercontent.com/beeva-marianmoldovan/hacknight-papis-bcn/master/bcn-images-right/1.jpg"
-    url = "images"
-    load_images_graphlab(url)
-    return result
-
 @app.route('/processimages', methods=['GET'])
 def process_images():
     result = "Yeah"
@@ -40,16 +32,10 @@ def process_images():
     process_images_graphlab(url)
     return result
 
-@app.route('/getpath', methods=['GET'])
-def get_path():
-    result = "Yeah"
-    get_path_graphlab(16, 23)
-    return result
-
 @app.route('/findpath', methods=['GET'])
 def find_path():
     result = "Yeah"
-    find_path_graphlab("images", 16, 23)
+    result = find_path_graphlab("images", 16, 23)
     return result
 
 @app.route('/getprogress', methods=['GET'])
@@ -58,11 +44,6 @@ def get_status():
     if not status:
       status = 0
     return str(status)
-
-@app.route('/hello', methods=['GET'])
-def  hello():
-    result = "hello"
-    return result
 
 @app.route('/searchimages', methods=['GET'])
 def search_images():
@@ -125,31 +106,6 @@ def clean(path):
         i += 1
 
 ###        
-def load_images_graphlab(url):
-    images = gl.image_analysis.load_images(url, random_order=False, with_path=True, recursive=True)  
-    images_resized = gl.SFrame()
-    images_resized['image'] = gl.image_analysis.resize(images['image'], 256, 256, 3)
-    images_resized = images_resized.add_row_number()
-    images_resized.save('tmp')
-
-@app.route('/preparemodel', methods=['GET'])
-def prepare_model():
-  result = "Yeah"
-  pretrained_model = gl.load_model('http://s3.amazonaws.com/GraphLab-Datasets/deeplearning/imagenet_model_iter45')
-  return result
-
-def get_path_graphlab(id1, id2):
-    images_resized = session['images']
-    images_resized['extracted_features'] = pretrained_model.extract_features(images_resized)
-    model = gl.nearest_neighbors.create(images_resized, features=['extracted_features'], label = 'id', distance='euclidean')
-    sf_nn = model.query(images_resized, k=10)
-    sf_nn = sf_nn[sf_nn['distance'] > 0]
-    sg_similarities = gl.SGraph().add_edges(sf_nn, src_field='query_label', dst_field='reference_label')
-    sp = gl.shortest_path.create(sg_similarities, source_vid=id1)
-    path = sp.get_path(id2)
-    print path
-    return path
-
 def incr_status():
   status = db.get('status')
   if not (status):
@@ -175,8 +131,7 @@ def process_images_graphlab(url):
   pretrained_model = gl.load_model('http://s3.amazonaws.com/GraphLab-Datasets/deeplearning/imagenet_model_iter45')
   incr_status() 
   images_resized['extracted_features'] = pretrained_model.extract_features(images_resized)
-  images_resized.save('tmp4')
-  images_resized.show()
+  images_resized.save('tmp5.csv', format='csv')
   end_time = time.time()
   uptime = end_time - start_time
   print "Time: "+str(uptime)
@@ -184,17 +139,20 @@ def process_images_graphlab(url):
 ###
 def find_path_graphlab(url, id1, id2):
     start_time = time.time()
-    images_resized = gl.load_sframe('tmp4')
+    images_resized = gl.load_sframe('tmp5.csv')
     incr_status()
     model = gl.nearest_neighbors.create(images_resized, features=['extracted_features'], label = 'id', distance='euclidean')
+
     incr_status() 
     k=10
     path = None
     while not path:
       print "try " + str(k)
       try:
-        sf_nn = model.query(images_resized, k)
+        sf_nn = model.query(images_resized, label = 'id', k = k)
+
         sf_nn = sf_nn[sf_nn['distance'] > 0]
+
         sg_similarities = gl.SGraph().add_edges(sf_nn, src_field='query_label', dst_field='reference_label')
         sp = gl.shortest_path.create(sg_similarities, source_vid=id1)
         path = sp.get_path(id2)
@@ -207,7 +165,7 @@ def find_path_graphlab(url, id1, id2):
     uptime = end_time - start_time
     print "Time: "+str(uptime)
     print path
-    return path
+    return jsonify(path)
 
 ###
 if __name__ == '__main__':
