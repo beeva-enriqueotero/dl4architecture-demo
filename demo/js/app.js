@@ -64,6 +64,7 @@ var AppController = new function(){
   var _modal = $(".modal").modal("hide");
   var _currentProgress = 0;
   var _maxProgress = 10;
+  var _city = "";
 
 
   // Functions
@@ -78,8 +79,8 @@ var AppController = new function(){
   var findImages = function(search){
 
     _reset();
-    var servicePath = "ajax/find.json?search="+search;
-
+    var servicePath = "/getallimages?city="+search;
+    _city = search;
     $.getJSON( servicePath,
       function( data ) {
         var imgs = data.result;
@@ -110,7 +111,7 @@ var AppController = new function(){
 
   var getResult = function(fromImg, toImg){
 
-    var servicePath = "ajax/result.json?from="+fromImg+"&to="+toImg;
+    var servicePath = "/findpath?from="+fromImg+"&to="+toImg+"&city="+_city;
 
     $.getJSON( servicePath,
       function( data ) {
@@ -136,15 +137,15 @@ var AppController = new function(){
     $.ajax({
 
         type: "GET",
-        url: "ajax/progress.json",
+        url: "/getprogress",
         data: {}
 
       })
       .done(function(data) {
         //console.log( "Progress call success with " + data );
-        if (/*data*/_currentProgress < _maxProgress){
-          window.setTimeout("AppController.getProgress()", 1000);
-          _currentProgress++;
+        if (data < _maxProgress){
+          window.setTimeout("AppController.getProgress()", 500);
+          _currentProgress = data;
           _modal.modal("show");
           _setProgress(_currentProgress*10);
         } else {
