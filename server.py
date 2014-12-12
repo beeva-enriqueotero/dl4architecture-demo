@@ -113,7 +113,7 @@ def get_all_images_from(city):
 ###
 def search_images_impl(city):
     path = 'images/'+city
-    go(city + ' building', path)
+    go(city + ' architecture building', path)
     clean(path)
 
 ###
@@ -127,7 +127,7 @@ def go(query, path):
     os.makedirs(path)
  
   start = 0
-  while start < 60:
+  while start < 64:
       print start
       r = requests.get(BASE_URL % start)
       if json.loads(r.text)['responseData']['results'] is not None:
@@ -174,8 +174,12 @@ def reset_status():
   db.set('status', None)
 
 def replace_path(url):
-  filepath = "/home/enrique/github/dl4architecture-demo/"
+  #filepath = "/home/enrique/github/dl4architecture-demo/"
   #filepath = os.getcwd()
+  pathlist = url.split(os.sep)
+  subpath = pathlist[0:len(pathlist)-3]
+  filepath = "/".join(subpath)
+  #print newpath
   return url.replace(filepath, '')
 
 ###
