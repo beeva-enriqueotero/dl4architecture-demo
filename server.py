@@ -169,7 +169,9 @@ def incr_status():
   print("Step "+str(status))
 
 def replace_path(url):
-  return url.replace(os.getcwd(), '')
+  filepath = "/home/enrique/github/dl4architecture-demo/"
+  #filepath = os.getcwd()
+  return url.replace(filepath, '')
 
 ###
 def process_images_graphlab(url, city):
