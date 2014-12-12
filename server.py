@@ -111,8 +111,9 @@ def get_all_images_from(city):
 
 ###
 def search_images_impl(city):
-    go(city + ' building', 'images/'+city)
-    clean('images')
+    path = 'images/'+city
+    go(city + ' building', path)
+    clean(path)
 
 ###
 def go(query, path):
