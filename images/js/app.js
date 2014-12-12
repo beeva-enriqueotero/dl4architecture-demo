@@ -204,7 +204,7 @@ var _constructor = function(){
   );
   _findRoute.click(
     function(){
-      //getProgress();
+      getProgress();
       getResult(_fromImg, _toImg);
     }
   )
