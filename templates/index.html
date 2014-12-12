@@ -101,22 +101,23 @@
 
 			<div class="overlay"></div>
 		</div><!-- /container -->
-
+		{% raw %}
 		<!-- Templates -->
 		<script id="resultTmpl" type="x-tmpl-mustache">
 			<div class="col-lg-2 col-md-3 col-xs-4 thumb">
 					<a class="thumbnail" href="#">
-							<img class="img-responsive" src="{{url|safe}}" meta-id="{{id|safe}}" alt="">
+							<img class="img-responsive" src="{{url}}" meta-id="{{id}}" alt="">
 					</a>
 			</div>
 		</script>
 		<script id="foundImgsTmpl" type="x-tmpl-mustache">
 			<div class="col-lg-3 col-md-4 col-xs-6 thumb">
 					<a class="thumbnail" href="#">
-							<img class="img-responsive" src="{{url|safe}}" meta-id="{{id|safe}}" alt="">
+							<img class="img-responsive" src="{{url}}" meta-id="{{id}}" alt="">
 					</a>
 			</div>
 		</script>
+		{% endraw %}
 		<!-- Scripts -->
 		<script src="js/classie.js"></script>
 		<script src="js/app.js"></script>
