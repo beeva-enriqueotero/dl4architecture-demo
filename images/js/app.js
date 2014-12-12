@@ -1,36 +1,36 @@
 (function() {
   var morphSearch = document.getElementById( 'morphsearch' ),
-    input = morphSearch.querySelector( 'input.morphsearch-input' ),
-    ctrlClose = morphSearch.querySelector( 'span.morphsearch-close' ),
-    isOpen = isAnimating = false,
-    // show/hide search area
-    toggleSearch = function(evt) {
-      // return if open and the input gets focused
-      if( evt.type.toLowerCase() === 'focus' && isOpen ) return false;
+  input = morphSearch.querySelector( 'input.morphsearch-input' ),
+  ctrlClose = morphSearch.querySelector( 'span.morphsearch-close' ),
+  isOpen = isAnimating = false,
+  // show/hide search area
+  toggleSearch = function(evt) {
+    // return if open and the input gets focused
+    if( evt.type.toLowerCase() === 'focus' && isOpen ) return false;
 
-      var offsets = morphsearch.getBoundingClientRect();
-      if( isOpen ) {
-        classie.remove( morphSearch, 'open' );
+    var offsets = morphsearch.getBoundingClientRect();
+    if( isOpen ) {
+      classie.remove( morphSearch, 'open' );
 
-        // trick to hide input text once the search overlay closes
-        // todo: hardcoded times, should be done after transition ends
-        if( input.value !== '' ) {
+      // trick to hide input text once the search overlay closes
+      // todo: hardcoded times, should be done after transition ends
+      if( input.value !== '' ) {
+        setTimeout(function() {
+          classie.add( morphSearch, 'hideInput' );
           setTimeout(function() {
-            classie.add( morphSearch, 'hideInput' );
-            setTimeout(function() {
-              classie.remove( morphSearch, 'hideInput' );
-              input.value = '';
-            }, 300 );
-          }, 500);
-        }
+            classie.remove( morphSearch, 'hideInput' );
+            input.value = '';
+          }, 300 );
+        }, 500);
+      }
 
-        input.blur();
-      }
-      else {
-        classie.add( morphSearch, 'open' );
-      }
-      isOpen = !isOpen;
-    };
+      input.blur();
+    }
+    else {
+      classie.add( morphSearch, 'open' );
+    }
+    isOpen = !isOpen;
+  };
 
   // events
   input.addEventListener( 'focus', toggleSearch );
@@ -64,6 +64,7 @@ var AppController = new function(){
   var _modal = $(".modal").modal("hide");
   var _currentProgress = 0;
   var _maxProgress = 10;
+  var _city = "";
 
 
   // Functions
@@ -78,8 +79,8 @@ var AppController = new function(){
   var findImages = function(search){
 
     _reset();
-    var servicePath = "ajax/find.json?search="+search;
-
+    var servicePath = "/getallimages?city="+search;
+    _city = search;
     $.getJSON( servicePath,
       function( data ) {
         var imgs = data.result;
@@ -110,7 +111,7 @@ var AppController = new function(){
 
   var getResult = function(fromImg, toImg){
 
-    var servicePath = "ajax/result.json?from="+fromImg+"&to="+toImg;
+    var servicePath = "/findpath?from="+fromImg+"&to="+toImg+"&city="+_city;
 
     $.getJSON( servicePath,
       function( data ) {
@@ -135,87 +136,87 @@ var AppController = new function(){
 
     $.ajax({
 
-        type: "GET",
-        url: "ajax/progress.json",
-        data: {}
+      type: "GET",
+      url: "/getprogress",
+      data: {}
 
-      })
-      .done(function(data) {
-        //console.log( "Progress call success with " + data );
-        if (/*data*/_currentProgress < _maxProgress){
-          window.setTimeout("AppController.getProgress()", 1000);
-          _currentProgress++;
-          _modal.modal("show");
-          _setProgress(_currentProgress*10);
-        } else {
-          _currentProgress = 0;
-          _modal.modal("hide");
-          _setProgress(_currentProgress);
-        }
-      });
-      /*.fail(function() {
-        alert( "error" );
-      })
-      .always(function() {
-        alert( "complete" );
-      });*/
-
-
-  }
-
-
-
-  var _fromImg = "";
-  var _toImg = "";
-  var _setImgBehaviour = function(){
-    _fromImg = "";
-    _toImg = "";
-    $(".morphsearch-content .thumb a").click(
-      function(){
-        var url = $(this).find("img").attr("src");
-        var idImg = $(this).find("img").attr("meta-id");
-        if (_fromImg == ""){
-          //_fromImg = url;
-          _fromImg = idImg;
-          $(this).addClass("fromImg");
-        } else if (_toImg == ""){
-          //_toImg = url;
-          _toImg = idImg;
-          $(this).addClass("toImg");
-          _findRoute.show();
-        }
+    })
+    .done(function(data) {
+      //console.log( "Progress call success with " + data );
+      if (data < _maxProgress){
+        window.setTimeout("AppController.getProgress()", 500);
+        _currentProgress = data;
+        _modal.modal("show");
+        _setProgress(_currentProgress*10);
+      } else {
+        _currentProgress = 0;
+        _modal.modal("hide");
+        _setProgress(_currentProgress);
       }
-    )
-  }
+    });
+    /*.fail(function() {
+    alert( "error" );
+  })
+  .always(function() {
+  alert( "complete" );
+});*/
 
-  // Basic constructor
-  var _constructor = function(){
-    _reset();
-    _submitButton.click(
-      function(){
 
-        var searchTerm = $("input.morphsearch-input").val().trim();
-        console.log("Searching: "+searchTerm)
-        if (searchTerm!=""){
-          findImages(searchTerm);
-        }
+}
+
+
+
+var _fromImg = "";
+var _toImg = "";
+var _setImgBehaviour = function(){
+  _fromImg = "";
+  _toImg = "";
+  $(".morphsearch-content .thumb a").click(
+    function(){
+      var url = $(this).find("img").attr("src");
+      var idImg = $(this).find("img").attr("meta-id");
+      if (_fromImg == ""){
+        //_fromImg = url;
+        _fromImg = idImg;
+        $(this).addClass("fromImg");
+      } else if (_toImg == ""){
+        //_toImg = url;
+        _toImg = idImg;
+        $(this).addClass("toImg");
+        _findRoute.show();
       }
-    );
-    _findRoute.click(
-      function(){
-        getProgress();
-        getResult(_fromImg, _toImg);
+    }
+  )
+}
+
+// Basic constructor
+var _constructor = function(){
+  _reset();
+  _submitButton.click(
+    function(){
+
+      var searchTerm = $("input.morphsearch-input").val().trim();
+      console.log("Searching: "+searchTerm)
+      if (searchTerm!=""){
+        findImages(searchTerm);
       }
-    )
+    }
+  );
+  _findRoute.click(
+    function(){
+      getProgress();
+      getResult(_fromImg, _toImg);
+    }
+  )
 
-  }
+}
 
-  // Public functions
-  this.findImages = findImages;
-  this.getResult = getResult;
-  this.getProgress = getProgress;
+// Public functions
+this.findImages = findImages;
+this.getResult = getResult;
+this.getProgress = getProgress;
 
-  // Start
-  _constructor();
+// Start
+_constructor();
 
 }
