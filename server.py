@@ -21,11 +21,18 @@ import pickle
 import pickledb 
 
 
-#app = Flask(__name__)
-app = Flask(__name__, static_url_path='/static')
+
+import os
+
+
+app = Flask(__name__, static_folder='images', static_url_path="/")
 
 db = pickledb.load('example.db', False) 
 
+@app.route('/images/<path:path>')
+def static_proxy(path):
+    # send_static_file will guess the correct MIME type
+    return app.send_static_file(path)
 
 @app.route('/processimages', methods=['GET'])
 def process_images():
