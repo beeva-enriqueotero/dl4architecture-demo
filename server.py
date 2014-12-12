@@ -205,7 +205,7 @@ def find_path_graphlab(url, id1, id2, city):
     model = gl.nearest_neighbors.create(images_resized, features=['extracted_features'], label = 'id', distance='euclidean')
 
     incr_status() 
-    k=6
+    k=2
     path = None
     while not path:
       print "try " + str(k)
