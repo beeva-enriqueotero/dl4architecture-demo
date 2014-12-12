@@ -69,8 +69,12 @@ def process_images():
 
 @app.route('/findpath', methods=['GET'])
 def find_path():
-    result = "Yeah"
-    result = find_path_graphlab("images", 16, 23)
+    jsontext = request.args.get('json', False, type=str)
+    print jsontext
+    myjson = json.loads(jsontext)
+    myfrom = myjson['from']
+    myto = myjson['to']
+    result = find_path_graphlab("images", myfrom, myto)
     return result
 
 @app.route('/getprogress', methods=['GET'])
