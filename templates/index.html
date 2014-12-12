@@ -106,14 +106,14 @@
 		<script id="resultTmpl" type="x-tmpl-mustache">
 			<div class="col-lg-2 col-md-3 col-xs-4 thumb">
 					<a class="thumbnail" href="#">
-							<img class="img-responsive" src="{{url}}" meta-id="{{id}}" alt="">
+							<img class="img-responsive" src="{{url|safe}}" meta-id="{{id|safe}}" alt="">
 					</a>
 			</div>
 		</script>
 		<script id="foundImgsTmpl" type="x-tmpl-mustache">
 			<div class="col-lg-3 col-md-4 col-xs-6 thumb">
 					<a class="thumbnail" href="#">
-							<img class="img-responsive" src="{{url}}" meta-id="{{id}}" alt="">
+							<img class="img-responsive" src="{{url|safe}}" meta-id="{{id|safe}}" alt="">
 					</a>
 			</div>
 		</script>
