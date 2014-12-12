@@ -114,6 +114,8 @@ def get_all_images_from(city):
 def search_images_impl(city):
     path = 'images/'+city
     go(city + ' architecture building', path)
+    go(city + ' modern building', path)
+    go(city + ' classic building', path)
     clean(path)
 
 ###
