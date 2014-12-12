@@ -133,6 +133,7 @@ var AppController = new function(){
   var getProgress = function(){
 
     _modal.show();
+    _modal.modal("show");
 
     $.ajax({
 
@@ -152,6 +153,7 @@ var AppController = new function(){
         _currentProgress = data;
         _setProgress(_currentProgress);
         _modal.modal("hide");
+        _modal.hide();
         _currentProgress = 0;
       }
     });
