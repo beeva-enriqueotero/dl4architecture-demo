@@ -63,7 +63,7 @@ var AppController = new function(){
   var _findRoute = $("#findRoute");
   var _modal = $(".modal").modal("hide");
   var _currentProgress = 0;
-  var _maxProgress = 3;
+  var _maxProgress = 4;
   var _city = "";
 
 
@@ -152,9 +152,9 @@ var AppController = new function(){
       } else {
         _currentProgress = data;
         _setProgress(_currentProgress);
+        _currentProgress = 0;
         _modal.modal("hide");
         _modal.hide();
-        _currentProgress = 0;
       }
     });
     /*.fail(function() {
