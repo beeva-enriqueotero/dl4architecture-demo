@@ -63,7 +63,7 @@ var AppController = new function(){
   var _findRoute = $("#findRoute");
   var _modal = $(".modal").modal("hide");
   var _currentProgress = 0;
-  var _maxProgress = 10;
+  var _maxProgress = 3;
   var _city = "";
 
 
@@ -144,10 +144,10 @@ var AppController = new function(){
     .done(function(data) {
       //console.log( "Progress call success with " + data );
       if (data < _maxProgress){
-        window.setTimeout("AppController.getProgress()", 500);
+        window.setTimeout("AppController.getProgress()", 1000);
         _currentProgress = data;
         _modal.modal("show");
-        _setProgress(_currentProgress*10);
+        _setProgress(_currentProgress*30);
       } else {
         _currentProgress = 0;
         _modal.modal("hide");
