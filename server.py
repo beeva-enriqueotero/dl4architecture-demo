@@ -243,6 +243,7 @@ def find_path_graphlab(url, id1, id2, city):
       print data
       array.append(data)
 
+    incr_status()
     return json.dumps({"result":array})
 
 
