@@ -37,19 +37,18 @@ def static_proxy(path):
 
 @app.route('/processimages', methods=['GET'])
 def process_images():
-    result = "Yeah"
+    mycity = request.args.get('city', False, type=str)
     global myport
-    process_images_graphlab('images')
+    process_images_graphlab("images/"+mycity, mycity)
+    result = get_all_images_from(mycity)
     return result
 
 @app.route('/findpath', methods=['GET'])
 def find_path():
-    jsontext = request.args.get('json', False, type=str)
-    print jsontext
-    myjson = json.loads(jsontext)
-    myfrom = myjson['from']
-    myto = myjson['to']
-    result = find_path_graphlab("images", myfrom, myto)
+    myfrom = request.args.get('from', False, type=int)
+    myto = request.args.get('to', False, type=int)
+    mycity = request.args.get('city', False, type=str)
+    result = find_path_graphlab("images/"+mycity, myfrom, myto, mycity)
     return result
 
 @app.route('/getprogress', methods=['GET'])
@@ -72,8 +71,12 @@ def search_images():
 
 @app.route('/getallimages', methods=['GET'])
 def get_all_images():
+    mycity = request.args.get('city', False, type=str)
+    return get_all_images_from(mycity)
+
+def get_all_images_from(city):
     array = []
-    images_resized = gl.load_sframe('tmp5.csv')
+    images_resized = gl.load_sframe('model/'+city+'.csv')
     for item in images_resized:
       data = {}
       data['id'] = item['id']
@@ -81,10 +84,9 @@ def get_all_images():
       array.append(data)
     return json.dumps({"result":array})
 
-
 ###
 def search_images_impl(city):
-    go(city + ' building', 'images')
+    go(city + ' building', 'images/'+city)
     clean('images')
 
 ###
@@ -145,7 +147,7 @@ def replace_path(url):
   return url.replace(os.getcwd(), '')
 
 ###
-def process_images_graphlab(url):
+def process_images_graphlab(url, city):
   start_time = time.time()
   incr_status()  
   images = gl.image_analysis.load_images(url, random_order=False, with_path=True)
@@ -154,26 +156,28 @@ def process_images_graphlab(url):
   images_resized = gl.SFrame()
   images_resized['image'] = gl.image_analysis.resize(images['image'], 256, 256, 3)
   images_resized = images_resized.add_row_number()
+  images_resized['path'] = images['path']
   
   incr_status()
  
   pretrained_model = gl.load_model('http://s3.amazonaws.com/GraphLab-Datasets/deeplearning/imagenet_model_iter45')
   incr_status() 
   images_resized['extracted_features'] = pretrained_model.extract_features(images_resized)
-  images_resized.save('tmp5.csv', format='csv')
+  images_resized.save('model/'+city+'.csv', format='csv')
   end_time = time.time()
   uptime = end_time - start_time
   print "Time: "+str(uptime)
 
 ###
-def find_path_graphlab(url, id1, id2):
+def find_path_graphlab(url, id1, id2, city):
     start_time = time.time()
-    images_resized = gl.load_sframe('tmp5.csv')
+    images_resized = gl.load_sframe('model/'+city+'.csv')
+    #images_resized.show()
     incr_status()
     model = gl.nearest_neighbors.create(images_resized, features=['extracted_features'], label = 'id', distance='euclidean')
 
     incr_status() 
-    k=8
+    k=6
     path = None
     while not path:
       print "try " + str(k)
