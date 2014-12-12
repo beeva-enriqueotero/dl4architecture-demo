@@ -2,6 +2,7 @@
 from flask import Flask, jsonify
 from flask import request
 from flask import session
+from flask import render_template
 
 import json
 import time
@@ -30,10 +31,34 @@ app = Flask(__name__, static_folder='images', static_url_path="/")
 
 db = pickledb.load('example.db', False) 
 
+@app.route('/')
+def home():
+  return render_template('index.html')
+
 @app.route('/images/<path:path>')
 def static_proxy(path):
-    # send_static_file will guess the correct MIME type
-    return app.send_static_file(path)
+  return app.send_static_file(path)
+
+@app.route('/js/<path:path>')
+def static_js(path):
+  return app.send_static_file(os.path.join('js', path))
+
+@app.route('/css/<path:path>')
+def static_css(path):
+  return app.send_static_file(os.path.join('css', path))
+
+@app.route('/fonts/<path:path>')
+def static_fonts(path):
+  return app.send_static_file(os.path.join('fonts', path))
+
+@app.route('/img/<path:path>')
+def static_img(path):
+  return app.send_static_file(os.path.join('img', path))
+
+@app.route('/ajax/<path:path>')
+def static_ajax(path):
+  return app.send_static_file(os.path.join('ajax', path))
+
 
 @app.route('/processimages', methods=['GET'])
 def process_images():
