@@ -24,6 +24,7 @@ import pickledb
 
 import os
 
+myport = 8080
 
 app = Flask(__name__, static_folder='images', static_url_path="/")
 
@@ -37,8 +38,8 @@ def static_proxy(path):
 @app.route('/processimages', methods=['GET'])
 def process_images():
     result = "Yeah"
-    url = "images"
-    process_images_graphlab(url)
+    global myport
+    process_images_graphlab('images')
     return result
 
 @app.route('/findpath', methods=['GET'])
@@ -72,9 +73,8 @@ def get_all_images():
     for item in images_resized:
       data = {}
       data['id'] = item['id']
-      data['url'] = item['path']
+      data['url'] = replace_path(item['path'])
       array.append(data)
-#    path2 = translate_path(path, images_resized)
     return json.dumps({"result":array})
 
 
@@ -137,6 +137,9 @@ def incr_status():
   db.set('status', status)
   print("Step "+str(status))
 
+def replace_path(url):
+  return url.replace(os.getcwd(), '')
+
 ###
 def process_images_graphlab(url):
   start_time = time.time()
@@ -147,7 +150,7 @@ def process_images_graphlab(url):
   images_resized = gl.SFrame()
   images_resized['image'] = gl.image_analysis.resize(images['image'], 256, 256, 3)
   images_resized = images_resized.add_row_number()
-  images_resized['path'] = images['path']
+  
   incr_status()
  
   pretrained_model = gl.load_model('http://s3.amazonaws.com/GraphLab-Datasets/deeplearning/imagenet_model_iter45')
@@ -172,9 +175,7 @@ def find_path_graphlab(url, id1, id2):
       print "try " + str(k)
       try:
         sf_nn = model.query(images_resized, label = 'id', k = k)
-
         sf_nn = sf_nn[sf_nn['distance'] > 0]
-
         sg_similarities = gl.SGraph().add_edges(sf_nn, src_field='query_label', dst_field='reference_label')
         sp = gl.shortest_path.create(sg_similarities, source_vid=id1)
         path = sp.get_path(id2)
@@ -186,31 +187,22 @@ def find_path_graphlab(url, id1, id2):
     end_time = time.time()
     uptime = end_time - start_time
     print "Time: "+str(uptime)
-    print type(path)
-    #print path
+   
     array = []
     for item in path:
       print item
       data = {}
       data['id'] = item[0]
-      data['url'] = images_resized['path'][item[0]]
+      data['url'] = replace_path(images_resized['path'][item[0]])
       print data
       array.append(data)
-#    path2 = translate_path(path, images_resized)
+
     return json.dumps({"result":array})
 
 
-def translate_path(my_path, images_resized):
-    mylist = []
-    for x in my_path:
-      print(x)
-      x = x[0]
-      print(x)
-      mylist.append(MyImage(id=str(x), url=images_resized['path'][x]))
-    return mylist   
 
 ###
 if __name__ == '__main__':
     app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
-    app.run(debug=True, threaded=True, host='0.0.0.0', port=8080)
+    app.run(debug=True, threaded=True, host='0.0.0.0', port=myport)
 
