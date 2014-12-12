@@ -70,6 +70,7 @@ def process_images():
 
 @app.route('/findpath', methods=['GET'])
 def find_path():
+    reset_status()
     myfrom = request.args.get('from', False, type=int)
     myto = request.args.get('to', False, type=int)
     mycity = request.args.get('city', False, type=str)
@@ -168,6 +169,9 @@ def incr_status():
     status = status + 1
   db.set('status', status)
   print("Step "+str(status))
+
+def reset_status():
+  db.set('status', None)
 
 def replace_path(url):
   filepath = "/home/enrique/github/dl4architecture-demo/"
