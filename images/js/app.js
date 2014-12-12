@@ -144,14 +144,15 @@ var AppController = new function(){
     .done(function(data) {
       //console.log( "Progress call success with " + data );
       if (data < _maxProgress){
-        window.setTimeout("AppController.getProgress()", 1000);
+        window.setTimeout("AppController.getProgress()", 500);
         _currentProgress = data;
         _modal.modal("show");
-        _setProgress(_currentProgress*30);
+        _setProgress(_currentProgress*33);
       } else {
-        _currentProgress = 0;
-        _modal.modal("hide");
+        _currentProgress = data;
         _setProgress(_currentProgress);
+        _modal.modal("hide");
+        _currentProgress = 0;
       }
     });
     /*.fail(function() {
@@ -198,7 +199,7 @@ var _constructor = function(){
       var searchTerm = $("input.morphsearch-input").val().trim();
       console.log("Searching: "+searchTerm)
       if (searchTerm!=""){
-        findImages(searchTerm);
+        findImages(searchTerm.toLowerCase());
       }
     }
   );
